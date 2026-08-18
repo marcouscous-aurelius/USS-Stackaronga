@@ -49,7 +49,8 @@ class FocusStackEngine {
         let depthBuf = createDepthMap(from: sharpnessMaps, width: w, height: h)
         let depthImage = bufferToCIImage(depthBuf, width: w, height: h)
         for var b in sharpnessMaps { b.deallocateBuffer() }
-        depthBuf.deallocateBuffer()
+        var mutableDepthBuf = depthBuf
+        mutableDepthBuf.deallocateBuffer()
         return DepthMapResult(depthMap: depthImage, sharpnessMaps: [])
     }
 
