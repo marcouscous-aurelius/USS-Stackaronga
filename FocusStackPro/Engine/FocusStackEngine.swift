@@ -48,8 +48,8 @@ class FocusStackEngine {
         }
         let depthBuf = createDepthMap(from: sharpnessMaps, width: w, height: h)
         let depthImage = bufferToCIImage(depthBuf, width: w, height: h)
-        for var b in sharpnessMaps { b.free() }
-        depthBuf.free()
+        for var b in sharpnessMaps { b.deallocateBuffer() }
+        depthBuf.deallocateBuffer()
         return DepthMapResult(depthMap: depthImage, sharpnessMaps: [])
     }
 
@@ -74,20 +74,21 @@ class FocusStackEngine {
                 vImage_Flags(kvImageEdgeExtend)
             )
         }
-        src.free()
+        src.deallocateBuffer()
         return dst
     }
 
     private func createDepthMap(from maps: [vImage_Buffer], width: Int, height: Int) -> vImage_Buffer {
         var depth = createEmptyBuffer(width: width, height: height)
-        guard let depthData = depth.data.assumingMemoryBound(to: UInt8.self), !maps.isEmpty else { return depth }
+        let depthData = depth.data.assumingMemoryBound(to: UInt8.self)
+        guard !maps.isEmpty else { return depth }
         for y in 0..<height {
             for x in 0..<width {
                 let idx = y * width + x
                 var maxS: UInt8 = 0
                 var maxI: UInt8 = 0
                 for (mi, map) in maps.enumerated() {
-                    guard let md = map.data.assumingMemoryBound(to: UInt8.self) else { continue }
+                    let md = map.data.assumingMemoryBound(to: UInt8.self)
                     if md[idx] > maxS {
                         maxS = md[idx]
                         maxI = UInt8(mi)
@@ -208,7 +209,7 @@ struct DepthMapResult {
 }
 
 extension vImage_Buffer {
-    mutating func free() {
+    mutating func deallocateBuffer() {
         data.deallocate()
     }
 }
