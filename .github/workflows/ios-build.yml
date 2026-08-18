@@ -18,10 +18,14 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
+      - name: List available simulators
+        run: xcrun simctl list devices available | head -40
+
       - name: Build
         run: |
           xcodebuild build \
             -project FocusStackPro.xcodeproj \
             -scheme FocusStackPro \
-            -destination 'platform=iOS Simulator,name=iPad Pro 13-inch (M4)' \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
             CODE_SIGNING_ALLOWED=NO
